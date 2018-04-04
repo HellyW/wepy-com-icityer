@@ -1,0 +1,32 @@
+
+  <view  wx:if="{{show}}" class="icityer _d66b9e6">
+    <!-- 省市区主体 -->
+    <scroll-view class="container _d66b9e6" scroll-y scroll-into-view="{{quick_flag}}" scroll-with-animation="true" enable-back-to-top="true" catchscroll="scrollEvent">
+      <view class="types _d66b9e6" wx:for="{{navs}}" wx:for-item="nav" wx:if="{{DataSort[nav]}}" wx:key="t{{index}}" id="{{nav}}">
+        <view class="provinces _d66b9e6" wx:for="{{DataSort[nav]}}" wx:for-item="provinces" wx:key="p{{index}}">
+          <view class="province _d66b9e6">{{provinces.name}}</view>
+          <view class="citys _d66b9e6" wx:for="{{provinces.citys}}" wx:for-item="citys" wx:key="c{{index}}">
+            <view wx:if="{{provinces.name !== citys.name}}" class="city _d66b9e6">{{citys.name}}</view>
+            <view class="areas _d66b9e6" wx:for="{{citys.areas}}" wx:for-item="areas" wx:key="a{{index}}" data-province="{{provinces.name}}" data-city="{{citys.name}}" data-area="{{areas}}" catchtap="getCity">{{areas}}</view>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+    <!-- 右侧快速导航栏 -->
+    <view class="nav_quick_tool _d66b9e6">
+      <view class="nav_quick _d66b9e6" wx:for="{{navs}}" wx:for-item="nav" wx:key="n{{index}}" data-nav="{{nav}}" catchtap="quickTo">
+        <text wx:if="{{DataSort[nav]}}" class="nav {{nav===nav_flag?'active':''}} _d66b9e6">{{nav}}</text>
+      </view>
+    </view>
+    <!-- 悬浮搜索图标 -->
+    <view class="search-icon {{expandSearchInput?'expandToFull':''}} _d66b9e6" catchtap="showSearchInput">
+      <image src="./icon/search.png" class="_d66b9e6"/>
+      <input type="" name="" placeholder="请输入省市区" bindinput="getSearchText" class="_d66b9e6"/>
+    </view>
+    <!-- 搜索结果 -->
+    <view wx:if="{{expandSearchInput}}" class="search-result _d66b9e6">
+      <view class="search-option _d66b9e6" wx:for="{{searchData}}" wx:for-item="item" data-province="{{item.province}}" data-city="{{item.city}}" data-area="{{item.area}}" catchtap="getCity">
+        {{item.area}}-{{item.city}}-{{item.province}}
+      </view>
+    </view>
+  </view>

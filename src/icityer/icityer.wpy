@@ -1,0 +1,322 @@
+<style lang="less" scoped>
+@import "./animate";
+.icityer{
+  width:100vw;
+  height:100vh;
+  box-sizing:border-box;
+  padding:280rpx 10rpx 10rpx 10rpx;
+  position:absolute;
+  z-index:10000;
+  top:0;
+  left:0;
+  overflow:hidden;
+  background:#fff;
+  .container{
+    width: auto;
+    margin:0 50rpx;
+    height:100%;
+    box-sizing:border-box;
+    padding:0 80rpx 0 0;
+    .types{
+      .provinces{
+        .province{
+          font-size:42rpx;
+          font-weight:600;
+          padding:5rpx 15rpx;
+          text-align:right;
+          border-bottom:1rpx solid #898989;
+        }
+        .citys{
+          .city{
+            font-size:36rpx;
+            font-weight:300;
+            padding:5rpx 0;
+            margin:5rpx 0;
+          }
+        }
+        .areas{
+          display:inline-block;
+          padding:10rpx 20rpx;
+          margin:10rpx;
+          border:1rpx dotted #999999;
+          font-size:30rpx;
+          font-weight:100;
+          border-radius:30rpx;
+        }
+      }
+    }
+  }
+  .nav_quick_tool{
+    position:fixed;
+    z-index:1000;
+    right:30rpx;
+    bottom:60rpx;
+    width:80rpx;
+    padding:20rpx 0;
+    border-radius:40rpx;
+    background:#eee;
+    .nav_quick{
+      width:60rpx;
+      margin:0 10rpx;
+      font-size:32rpx;
+      .nav{
+        width:60rpx;
+        height:60rpx;
+        line-height:60rpx;
+        text-align:center;
+        display:inline-block;
+        &.active{
+          color:#fff;
+          background:#555;
+          border-radius:50%;
+        }
+      }
+    }
+  }
+  .search-icon{
+    position:absolute;
+    width:80rpx;
+    height:80rpx;
+    background:#eee;
+    top:180rpx;
+    left:60rpx;
+    border-radius:40rpx;
+    overflow:hidden;
+    display:flex;
+    image{
+      width:70rpx;
+      height:70rpx;
+      margin:5rpx;
+    }
+    input{
+      flex:1;
+      height:80rpx;
+      line-height:80rpx;
+      font-size:30rpx;
+
+    }
+  }
+  .search-result{
+    width:100vw;
+    height: 80%;
+    box-sizing:border-box;
+    position:absolute;
+    z-index:10001;
+    bottom: 0;
+    left:0;
+    overflow-x:hidden;
+    overflow-y:scroll;
+    background:#fff;
+    .search-option{
+      width:90%;
+      margin:10rpx auto;
+      padding:0 10rpx;
+      font-size:30rpx;
+      box-sizing:border-box;
+      height:80rpx;
+      line-height:80rpx;
+      border-bottom:1rpx solid #ddd;
+      overflow:hidden;
+      text-indent:30rpx;
+    }
+  }
+}
+</style>
+<template>
+  <view wx:if="{{show}}" class="icityer">
+    <!-- 省市区主体 -->
+    <scroll-view class="container" scroll-y scroll-into-view="{{quick_flag}}" scroll-with-animation="true" enable-back-to-top="true" @scroll.stop="scrollEvent" >
+      <view class="types" wx:for="{{navs}}" wx:for-item="nav" wx:if="{{DataSort[nav]}}"  wx:key="t{{index}}" id="{{nav}}">
+        <view class="provinces" wx:for="{{DataSort[nav]}}" wx:for-item="provinces" wx:key="p{{index}}">
+          <view class="province">{{provinces.name}}</view>
+          <view class="citys" wx:for="{{provinces.citys}}" wx:for-item="citys" wx:key="c{{index}}">
+            <view wx:if="{{provinces.name !== citys.name}}" class="city">{{citys.name}}</view>
+            <view class="areas" wx:for="{{citys.areas}}" wx:for-item="areas" wx:key="a{{index}}" data-province="{{provinces.name}}" data-city="{{citys.name}}" data-area="{{areas}}" @tap.stop="getCity">{{areas}}</view>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+    <!-- 右侧快速导航栏 -->
+    <view class="nav_quick_tool">
+      <view class="nav_quick" wx:for="{{navs}}" wx:for-item="nav" wx:key="n{{index}}" data-nav="{{nav}}" @tap.stop="quickTo">
+        <text wx:if="{{DataSort[nav]}}" class="nav {{nav===nav_flag?'active':''}}">{{nav}}</text>
+      </view>
+    </view>
+    <!-- 悬浮搜索图标 -->
+    <view class="search-icon {{expandSearchInput?'expandToFull':''}}" @tap.stop="showSearchInput">
+      <image src="./icon/search.png"></image>
+      <input type="" name="" placeholder="请输入省市区" bindinput="getSearchText"></input>
+    </view>
+    <!-- 搜索结果 -->
+    <view wx:if="{{expandSearchInput}}" class="search-result">
+      <view class="search-option" wx:for="{{searchData}}" wx:for-item="item" data-province="{{item.province}}" data-city="{{item.city}}" data-area="{{item.area}}" @tap.stop="getCity">
+        {{item.area}}-{{item.city}}-{{item.province}}
+      </view>
+    </view>
+  </view>
+</template>
+<script>
+  import wepy from 'wepy'
+  import { CITYSDATA } from './cityData'
+  export default class Icityer extends wepy.component {
+    props = {
+      show: {
+        type: Boolean,
+        default: true
+      }
+    }
+    computed = {
+      DataSort: function () {
+        let _data = {}
+        for (let i in this.CITYSDATA) {
+          if (!_data[this.CITYSDATA[i].key]) {
+            _data[this.CITYSDATA[i].key] = [this.CITYSDATA[i]]
+          } else {
+            _data[this.CITYSDATA[i].key].push(this.CITYSDATA[i])
+          }
+        }
+        return _data
+      }
+    }
+
+    watch = {
+    }
+    data = {
+      'quick_flag': 'A',
+      'nav_flag': 'A',
+      'navs': ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'],
+      CITYSDATA,
+      expandSearchInput: false,
+      searchData: []
+    }
+    onLoad() {
+    }
+    _getTopToNav () {
+      let self = this
+      let _navs = this.navs
+      let _index = 0
+      let _checkActiveFlag = function (n, cb) {
+        let query = wepy.createSelectorQuery()
+        query.select(`#${_navs[n]}`).boundingClientRect()
+        query.selectViewport().scrollOffset()
+        query.exec(function(res) {
+          if (!res[0]) {
+            return cb && cb(true)
+          }
+          if (res[0].top < 20) {
+            return cb && cb(true)
+          }
+          return cb && cb(false)
+        })
+      }
+      let _setActiveFlag = function () {
+        _checkActiveFlag(_index, (status) => {
+          if (status && _index < _navs.length) {
+            _index++
+            _setActiveFlag()
+          } else {
+            self.nav_flag = _navs[_index]
+            self.$apply()
+          }
+        })
+      }
+      _setActiveFlag()
+    }
+    _pushAllCity (province, city) {
+      let _searchCityData = []
+      for (let i in city) {
+        let _city = city[i].name
+        let _areas = city[i].areas
+        for (let j in _areas) {
+          _searchCityData.push({
+            province: province,
+            city: _city,
+            area: _areas[j]
+          })
+        }
+      }
+      return _searchCityData
+    }
+    _pushAllArea (province, city, area) {
+      let _searchCityData = []
+      for (let i in area) {
+        _searchCityData.push({
+          province: province,
+          city: city,
+          area: area[i]
+        })
+      }
+      return _searchCityData
+    }
+    _pushSearchCityData (searchText) {
+      let _searchCityData = []
+      for (let i in this.CITYSDATA) {
+        if (_searchCityData.length > 30) {
+          break
+        }
+        let _province = this.CITYSDATA[i].name
+        if (_province.indexOf(searchText)!==-1) {
+          _searchCityData = _searchCityData.concat(this._pushAllCity(_province, this.CITYSDATA[i].citys))
+          continue
+        }
+        let _citys = this.CITYSDATA[i].citys
+        for (let j in _citys) {
+          let _city = _citys[j].name
+          if (_city.indexOf(searchText)!==-1) {
+            _searchCityData = _searchCityData.concat(this._pushAllArea(_province, _city, _citys[j].areas))
+            continue
+          }
+          let _areas = _citys[j].areas
+          for (let k in _areas) {
+            let _area = _areas[k]
+            if (_area.indexOf(searchText)!==-1) {
+              _searchCityData.push({
+                province: _province,
+                city: _city,
+                area: _area
+              })
+            }
+          }
+        }
+      }
+      this.searchData = _searchCityData
+      this.$apply()
+    }
+    methods = {
+      getCity: function (e) {
+        let _province = e.currentTarget.dataset.province
+        let _city = e.currentTarget.dataset.city
+        let _area = e.currentTarget.dataset.area
+        this.expandSearchInput = false
+        this.$apply()
+        this.$emit('choose', {
+          province: _province,
+          city: _city,
+          area: _area
+        })
+      },
+      scrollEvent: function () {
+        // 暂时取消左侧滑动关联右侧关系
+        this._getTopToNav()
+        // this.$apply()
+      },
+      quickTo: function (e) {
+        let _id = e.currentTarget.dataset.nav
+        this.quick_flag = this.nav_flag = _id
+        this.$apply()
+      },
+      showSearchInput: function () {
+        this.expandSearchInput = true
+        this.$apply()
+      },
+
+      getSearchText: function (e) {
+        let _searchText = e.detail.value.trim()
+        if (_searchText==='') {
+          return
+        }
+        this._pushSearchCityData(_searchText)
+      }
+    }
+  }
+</script>

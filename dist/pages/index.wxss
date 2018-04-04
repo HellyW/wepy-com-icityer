@@ -1,0 +1,2 @@
+@import "./../icityer/icityer.wxss";
+button{display:inline-block;font-size:30rpx;padding:10rpx 20rpx;margin:10rpx}

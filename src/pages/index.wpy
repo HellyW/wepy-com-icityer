@@ -1,0 +1,36 @@
+<style lang="less">
+  button{
+    display:inline-block;
+    font-size:30rpx;
+    padding:10rpx 20rpx;
+    margin:10rpx;
+  }
+</style>
+<template>
+  <icityer @choose.user="chooseCity"></icityer>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import icityer from '../icityer/icityer'
+  export default class Index extends wepy.page {
+    config = {
+    }
+    data = {
+    }
+    components = {
+      icityer
+    }
+    methods = {
+      chooseCity: function (addr) {
+        wepy.showModal({
+          title: '您选择的城市是',
+          content: `${addr.province}-${addr.city}-${addr.area}`,
+          showCancel: false
+        })
+      }
+    }
+    onLoad() {
+    }
+  }
+</script>
