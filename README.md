@@ -1,3 +1,7 @@
+## 同类组件
+#### [现代样式弹窗组件](https://github.com/wahao/wepy-com-iviewer)
+#### [自定义状态系统导航栏，可监听返回事件](https://github.com/wahao/wepy-com-inaver)
+
 ##  如何查看demo
 
 ### 1.直接使用开发者打包文件：
